@@ -5,32 +5,32 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.geek.myapplication.R;
 import com.geek.myapplication.databinding.FragmentHomeBinding;
+import com.geek.myapplication.model.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.jetbrains.annotations.NotNull;
 
 public class HomeFragment extends Fragment {
 
-    private TodoAdapter adapter;
+    private TaskAdapter adapter;
+    private RecyclerView recyclerView;
     private FragmentHomeBinding binding;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new TodoAdapter();
+        adapter = new TaskAdapter();
 
     }
 
@@ -45,6 +45,7 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         FloatingActionButton fab = view.findViewById(R.id.fab);
+        recyclerView = view.findViewById(R.id.recyclerView);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,15 +53,20 @@ public class HomeFragment extends Fragment {
             }
         });
         setFragmentListener();
+        initList();
+    }
+
+    private void initList() {
+        recyclerView.setAdapter(adapter);
     }
 
     private void setFragmentListener() {
         getParentFragmentManager().setFragmentResultListener("rk_form", getViewLifecycleOwner(), new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull @NotNull String requestKey, @NonNull @NotNull Bundle result) {
-                String text =result.getString("text");
-                Log.e("Home","text" + text);
-                adapter.addItem(new ToDoModel(result.getString("text")));
+                Task task = (Task)result.getSerializable("task");
+                Log.e("Home","text" + task.getTitle());
+                adapter.addItem(task);
             }
         });
     }

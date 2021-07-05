@@ -1,5 +1,6 @@
 package com.geek.myapplication.ui.ProfileFragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,7 +44,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
+        if (requestCode == 1 && requestCode == Activity.RESULT_OK) {
             Uri selectedImageUri = data.getData();
             if (selectedImageUri != null) {
                 binding.imgView.setImageURI(selectedImageUri);

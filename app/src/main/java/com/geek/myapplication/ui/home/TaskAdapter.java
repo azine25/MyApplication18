@@ -1,26 +1,26 @@
 package com.geek.myapplication.ui.home;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.geek.myapplication.databinding.ItemTodoBinding;
+import com.geek.myapplication.model.Task;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> {
+public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
-    private ArrayList<ToDoModel> list = new ArrayList<ToDoModel>();
+    private ArrayList<Task> list = new ArrayList<>();
 
 
-    public void addItem(ToDoModel model){
-        this.list.add(model);
-        notifyDataSetChanged();
+    public void addItem(Task task){
+        list.add(0,task);
+        notifyItemInserted(list.indexOf(task));
     }
 
     @Override
@@ -47,8 +47,8 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> {
             binding = itemView;
         }
 
-        public void onBind(ToDoModel toDoModel) {
-            binding.text.setText(toDoModel.getText());
+        public void onBind(Task task) {
+            binding.text.setText(task.getTitle());
         }
     }
 }

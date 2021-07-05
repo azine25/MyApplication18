@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.geek.myapplication.model.Task;
+
 import org.jetbrains.annotations.NotNull;
 
 public class FormFragment extends Fragment {
@@ -39,7 +41,8 @@ public class FormFragment extends Fragment {
     private void save() {
         String text = editText.getText().toString();
         Bundle bundle = new Bundle();
-        bundle.putString("text",text);
+        Task task = new Task(text);
+        bundle.putSerializable("task",task);
         getParentFragmentManager().setFragmentResult("rk_form",bundle);
         close();
 
