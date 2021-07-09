@@ -1,10 +1,13 @@
 package com.geek.myapplication.ui.home;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,9 +17,12 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.geek.myapplication.FormFragment;
+import com.geek.myapplication.OnItemClickListener;
 import com.geek.myapplication.R;
 import com.geek.myapplication.databinding.FragmentHomeBinding;
 import com.geek.myapplication.model.Task;
+import com.geek.myapplication.ui.App;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.jetbrains.annotations.NotNull;
@@ -24,8 +30,9 @@ import org.jetbrains.annotations.NotNull;
 public class HomeFragment extends Fragment {
 
     private TaskAdapter adapter;
-    private RecyclerView recyclerView;
     private FragmentHomeBinding binding;
+    private static int pos;
+    private boolean isChanged = false;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -36,8 +43,7 @@ public class HomeFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentHomeBinding.inflate(inflater,container,false);
-        binding.recyclerView.setAdapter(adapter);
+        binding = FragmentHomeBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -45,35 +51,65 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         FloatingActionButton fab = view.findViewById(R.id.fab);
-        recyclerView = view.findViewById(R.id.recyclerView);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFrag();
-            }
+
+        fab.setOnClickListener(v -> {
+            isChanged = false;
+            openFrag(null);
         });
+
         setFragmentListener();
         initList();
     }
 
     private void initList() {
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setAdapter(adapter);
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                pos = position;
+                isChanged = true;
+                Task task = adapter.getItem(position);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("update", task);
+                FormFragment fragment = new FormFragment();
+                fragment.setArguments(bundle);
+                openFrag(task);
+            }
+
+            @Override
+            public void onItemLongClick(int position) {
+                Task task = adapter.getItem(position);
+                new AlertDialog.Builder(requireContext()).setMessage("Удалить запись" + task.getTitle() + "?")
+                        .setNegativeButton("Нет", null)
+                        .setPositiveButton("да", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                adapter.removeItem(position);
+                            }
+                        }).show();
+            }
+        });
     }
 
     private void setFragmentListener() {
         getParentFragmentManager().setFragmentResultListener("rk_form", getViewLifecycleOwner(), new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull @NotNull String requestKey, @NonNull @NotNull Bundle result) {
-                Task task = (Task)result.getSerializable("task");
-                Log.e("Home","text" + task.getTitle());
-                adapter.addItem(task);
+                Task task = new Task((String) result.getSerializable("text"));
+                if (isChanged) {
+                    adapter.updateItem(task, pos);
+                } else {
+                    adapter.addItem(task);
+                }
             }
         });
     }
 
 
-    private void openFrag() {
+    private void openFrag(Task task) {
         NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_activity_main);
-        navController.navigate(R.id.formFragment);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("task", task);
+        navController.navigate(R.id.formFragment, bundle);
     }
 }

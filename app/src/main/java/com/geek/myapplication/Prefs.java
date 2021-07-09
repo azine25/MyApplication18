@@ -12,6 +12,18 @@ public class Prefs {
         return instance;
     }
 
+    public void saveImage (String uri){
+        preferences.edit().putString("saveImage",uri).apply();
+    }
+
+    public String getImageUri(){
+       return preferences.getString("saveImage",null);
+    }
+    public void delete(){
+        preferences.edit().remove("saveImage").apply();
+     }
+
+
     public Prefs(Context context) {
         instance = this;
         preferences= context.getSharedPreferences("settings",Context.MODE_PRIVATE);
